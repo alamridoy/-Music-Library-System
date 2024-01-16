@@ -13,9 +13,12 @@ global.config = require('./jwt/config');
 
 //const adminRouter = require('./routers/authentication');
 
-const test = require('./routers/authentication');
+const authenticationRouter = require('./routers/authentication');
+const artistRouter = require('./routers/artist');
 
-router.use('/abc', test);
+
+router.use('/authentication', authenticationRouter);
+router.use('/artist', artistRouter);
 
 
 module.exports = router;  

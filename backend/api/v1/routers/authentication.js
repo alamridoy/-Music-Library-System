@@ -56,11 +56,6 @@ router.post('/registration', [
     // password hashing
      reqData.password = bcrypt.hashSync(reqData.password,10)
 
-//      return res.status(400).send({
-//         "success": false,
-//         "status": 400,
-//         "data":reqData
-//    });
 
    // save in database
    let result = await userModel.addNew(reqData);
