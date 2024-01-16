@@ -14,7 +14,6 @@ router.use(async function (req, res, next) {
     try {
         if (token) {
             const decoded = jwt.verify(token, "M360ICTMusicLibrary", { algorithm: 'HS256' });
-            console.log("decoded",decoded)
             req.user = decoded;
             next();
         } else {

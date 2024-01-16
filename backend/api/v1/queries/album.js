@@ -1,4 +1,4 @@
-let table_name = "m360ict_artists";
+let table_name = "m360ict_albums";
 
 
 
@@ -6,10 +6,9 @@ let addNew = () => {
     return `INSERT INTO ${table_name} SET ?`;
 }
 
-let getByName = () => {
-    return `SELECT * FROM ${table_name} where  name = ? and status != 0`;
+let getByTitle = () => {
+    return `SELECT * FROM ${table_name} where  title = ? and status != 0`;
 }
-
 
 let getList = () => {
     return `SELECT * FROM ${table_name}  where status = 1`;
@@ -25,7 +24,7 @@ const updateById = () => {
 
 module.exports = {
     addNew,
-    getByName,
+    getByTitle,
     getList,
     getById,
     updateById

@@ -15,10 +15,13 @@ global.config = require('./jwt/config');
 
 const authenticationRouter = require('./routers/authentication');
 const artistRouter = require('./routers/artist');
+const albumRouter = require('./routers/album');
+
 
 
 router.use('/authentication', authenticationRouter);
 router.use('/artist', artistRouter);
+router.use('/album', albumRouter);
 
 
 module.exports = router;  

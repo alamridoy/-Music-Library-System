@@ -56,11 +56,22 @@ router.post('/add', verifyToken, [
         });
     }
 
+    // existing artist in database
+      // title existing database
+      let existingName = await artistModel.getByName(reqData.name)
+      if(!isEmpty(existingName)){
+          return res.status(409).send({
+              "success": false,
+              "status": 409,
+              "message":"This artist name already exists."
+            });
+      }
+
 
 
     // check date of birth is equal to today to tomorrow
     let date = moment(current_date, "YYYY-MM-DD").format("YYYY-MM-DD");
-    console.log(date)
+ 
     if (reqData.date_of_birth >= date) {
       return res.status(400).send({
           "success": false,
@@ -162,7 +173,7 @@ router.get('/details/:id',verifyToken,[
 
 
 //delete
-router.put('/delete',verifyToken,[
+router.delete('/delete',verifyToken,[
   // Example body validations
   check('id').isInt().withMessage('Please provide a number'),
 ],async (req, res) => {
@@ -220,7 +231,6 @@ router.put('/delete',verifyToken,[
   
 
 //update
-// create artist 
 router.put('/update', verifyToken, [
   // Example body validations
   check('id').isInt().withMessage('Please provide a number'),
@@ -348,4 +358,6 @@ if (willWeUpdate == 1) {
  
 });
 
-  module.exports = router;  
+
+
+module.exports = router;  

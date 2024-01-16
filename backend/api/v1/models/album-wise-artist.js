@@ -1,5 +1,5 @@
 const { connectionMusicLibrarySystemMYSQL } = require('../connections/connection');
-const queries = require('../queries/artist');
+const queries = require('../queries/album-wise-artist');
 
 
 
@@ -7,15 +7,6 @@ const queries = require('../queries/artist');
 let addNew = async (info) => {
     return new Promise((resolve, reject) => {
         connectionMusicLibrarySystemMYSQL.query(queries.addNew(), [info], (error, result, fields) => {
-            if (error) reject(error)
-            else resolve(result)
-        });
-    });
-}
-
-let getByName = async(name = "") => {
-    return new Promise((resolve, reject) => {
-        connectionMusicLibrarySystemMYSQL.query(queries.getByName(), [name], (error, result, fields) => {
             if (error) reject(error)
             else resolve(result)
         });
@@ -55,7 +46,6 @@ let updateById = async (id = 0, data = {}) => {
 
 module.exports = {
    addNew,
-   getByName,
    getList,
    getById,
    updateById
