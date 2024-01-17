@@ -18,7 +18,13 @@ let getById = () => {
     return `SELECT * FROM ${table_name} where  id = ? and status = 1 `;
 }
 
+
+
 const updateById = () => {
+    return `UPDATE ${table_name} SET ? WHERE id = ?`;
+}
+
+const updateByAlbum = () => {
     return `UPDATE ${table_name} SET ? WHERE id = ?`;
 }
 
@@ -27,6 +33,7 @@ module.exports = {
     getByTitle,
     getList,
     getById,
-    updateById
+    updateById,
+    updateByAlbum
 
 }

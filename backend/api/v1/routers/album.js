@@ -355,6 +355,7 @@ router.delete('/delete',verifyToken,[
 //update
 router.put('/update', verifyToken, [
     // Example body validations
+    check('id').isInt().withMessage('Please give a valid  id.'),
     check('title').isString().withMessage('Please provide a string'),
     check('release_year').isInt().withMessage('Please give a valid year.'),
     check('genre_id').isInt().withMessage('Please give a valid genre id.'),
@@ -419,15 +420,15 @@ router.put('/update', verifyToken, [
             });
         }
     
-        // title existing database
-        let existingTitle = await albumModel.getByTitle(reqData.title)
-        if(!isEmpty(existingTitle)){
-            return res.status(409).send({
-                "success": false,
-                "status": 409,
-                "message":"This title already exists."
-              });
-        }
+        // // title existing database
+        // let existingTitle = await albumModel.getByTitle(reqData.title)
+        // if(!isEmpty(existingTitle)){
+        //     return res.status(409).send({
+        //         "success": false,
+        //         "status": 409,
+        //         "message":"This title already exists."
+        //       });
+        // }
     
   
     willWeUpdate = 1
@@ -496,6 +497,121 @@ router.put('/update', verifyToken, [
         updateData.genre_id = reqData.genre_id
     }
 
+
+
+
+    // artist id update
+
+    //check artist id empty or not
+    if(isEmpty(reqData.artist_id)){
+        return res.status(400).send({
+              "success": false,
+              "status": 400,
+              "message": "Artist id should not be empty."
+        });
+      }else if(reqData.artist_id < 1){
+          return res.status(400).send({
+              "success": false,
+              "status": 400,
+              "message": "Artist id should be positive number."
+        });
+      }else if(!Array.isArray(reqData.artist_id)){
+          return res.status(400).send({
+              "success": false,
+              "status": 400,
+              "message": "Artist id should be array."
+        });
+      }
+
+    // check duplicate value this artist id array
+    let tempId = []
+
+    for (let index = 0; index < reqData.artist_id.length; index++) {
+
+        let data = reqData.artist_id[index]
+
+        // check this artist id existing in database
+        let existingByArtistId = await artistModel.getById(data)
+        if(isEmpty(existingByArtistId)){
+            return res.status(404).send({
+                "success": false,
+                "status": 404,
+                "message": `This artist no ${index+1} id not found. `
+        });
+       }
+
+        tempId.push(data)
+
+        //duplicate check in array
+        let checkArtistIdISDuplicate = await duplicateCheckInArray(tempId)
+        if (checkArtistIdISDuplicate.result) {
+            return res.status(409).send({
+                success: false,
+                status: 409,
+                message: `Duplicate artist id position no: ${index + 1}.`,
+            });
+        }
+
+
+    }
+
+    artistArrayId = tempId
+
+    console.log("new",artistArrayId)
+
+
+    // get album wise artist table album id wise artist id find
+    let getByArtistIdInAlbum = await albumWiseArtistModel.getByArtistId(reqData.id)
+    if (isEmpty(getByArtistIdInAlbum)) {
+        return res.status(404).send({
+            success: false,
+            status: 404,
+            message: "Artist id not found.",
+        });
+    }
+
+
+    // each artist_id store in artistId with table id and artist id to update artist id purpose
+    let artistId = []
+    for (let index = 0; index < getByArtistIdInAlbum.length; index++) {
+        artistId.push({
+            id: getByArtistIdInAlbum[index].id,
+            artist_id: getByArtistIdInAlbum[index].artist_id
+        })
+
+    }
+console.log("pre",artistId)
+
+    // this place will be check get separate artist request new artist id and old artist id find
+    // new artist id has this array artistArrayId and previous db artist id has this array artistId
+
+    
+
+    let addedArr = [];
+    let deletedArr = [];
+    
+    // Use Sets for faster lookups
+    const artistArrayIdSet = new Set(artistArrayId);
+    const artistIdSet = new Set(artistId);
+    
+    // Find deleted items
+    deletedArr = artistId.filter(id => !artistArrayIdSet.has(id));
+    
+    // Find added items
+    addedArr = artistArrayId.filter(id => !artistIdSet.has(id));
+    
+    console.log("Deleted", deletedArr);
+    console.log("Add new", addedArr);
+        
+    
+    
+
+   
+    // return res.status(404).send({
+    //     "success": false,
+    //     "status": 404,
+    //     "message": updateData
+    // });
   
     if (isError == 1) {
       return res.status(400).send({
@@ -508,8 +624,8 @@ router.put('/update', verifyToken, [
   if (willWeUpdate == 1) {
   
     updateData.updated_at = current_time
-  
-    let result = await artistModel.updateById(reqData.id,updateData);
+    console.log(reqData.id,updateData)
+    let result = await albumModel.updateByAlbum(reqData.id,updateData,addedArr,deletedArr);
   
   
     if (result.affectedRows == undefined || result.affectedRows < 1) {
@@ -524,7 +640,7 @@ router.put('/update', verifyToken, [
     return res.status(200).send({
         "success": true,
         "status": 200,
-        "message": "Artist successfully updated."
+        "message": "Album successfully updated."
     });
   
   

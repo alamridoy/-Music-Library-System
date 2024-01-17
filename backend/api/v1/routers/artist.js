@@ -325,6 +325,7 @@ if (willWeUpdate == 1) {
 
   updateData.updated_at = current_time
 
+
   let result = await artistModel.updateById(reqData.id,updateData);
 
 

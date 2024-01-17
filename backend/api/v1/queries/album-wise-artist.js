@@ -19,10 +19,15 @@ const updateById = () => {
     return `UPDATE ${table_name} SET ? WHERE id = ?`;
 }
 
+let getByArtistId = () => {
+    return `SELECT * FROM ${table_name} where  album_id = ? and status = 1 `;
+}
+
 module.exports = {
     addNew,
     getList,
     getById,
-    updateById
+    updateById,
+    getByArtistId
 
 }

@@ -34,6 +34,7 @@ let getById = async (id = 0) => {
 
 
 
+
 let updateById = async (id = 0, data = {}) => {
     return new Promise((resolve, reject) => {
         connectionMusicLibrarySystemMYSQL.query(queries.updateById(), [data, id], (error, result, fields) => {
@@ -44,10 +45,21 @@ let updateById = async (id = 0, data = {}) => {
 }
 
 
+let getByArtistId = async (album_id = 0) => {
+    return new Promise((resolve, reject) => {
+        connectionMusicLibrarySystemMYSQL.query(queries.getByArtistId(), [album_id], (error, result, fields) => {
+            if (error) reject(error)
+            else resolve(result)
+        });
+    });
+}
+
+
 module.exports = {
    addNew,
    getList,
    getById,
-   updateById
+   updateById,
+   getByArtistId
   
 }

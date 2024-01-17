@@ -21,7 +21,6 @@ let addNew = async(albumData = {}, validateArtistId = []) => {
                 conn.query(queries.addNew(), [albumData], async(error, result, fields) => {
                   
                     if (error) {
-                        console.log("Aaaa",error)
                         return conn.rollback(function() {
                            
                             conn.release();
@@ -106,6 +105,17 @@ let getById = async (id = 0) => {
 
 
 
+let getByArtistId = async (id = 0) => {
+    return new Promise((resolve, reject) => {
+        connectionMusicLibrarySystemMYSQL.query(queries.getByArtistId(), [id], (error, result, fields) => {
+            if (error) reject(error)
+            else resolve(result)
+        });
+    });
+}
+
+
+
 let updateById = async (id = 0, data = {}) => {
     return new Promise((resolve, reject) => {
         connectionMusicLibrarySystemMYSQL.query(queries.updateById(), [data, id], (error, result, fields) => {
@@ -116,11 +126,131 @@ let updateById = async (id = 0, data = {}) => {
 }
 
 
+// update
+let updateByAlbum = (id = 0, updateData = {}, addedArr = [], deletedArr = [], conn = undefined) => {
+
+    return new Promise((resolve, reject) => {
+        connectionMusicLibrarySystemMYSQL.getConnection((err, conn) => {
+            conn.beginTransaction(async(error) => {
+                if (error) {
+                    return conn.rollback(() => {
+                        conn.release();
+                        resolve([]);
+                    });
+                }
+
+                let result;
+
+                // Update data
+                // if (Object.keys(updateData).length > 0) {
+                //     const keysOfUpdateData = Object.keys(updateData);
+                //     const dataParameterUpdateData = keysOfUpdateData.map((key) => updateData[key]);
+            
+                //     result = await new Promise((resolve, reject) => {
+                //         console.log("sssssssssssssssssss",dataParameterUpdateData)
+                //         conn.query(
+                //             queries.updateByAlbum(updateData), [...dataParameterUpdateData,id],
+                //             (error, result, fields) => {
+                //                 if (error) reject(error); 
+                //                 else resolve(result);
+                //             }
+                //         );
+                //     });
+                // }
+                if (Object.keys(updateData).length > 0) {
+                    const keysOfUpdateData = Object.keys(updateData);
+                    const dataParameterUpdateData = keysOfUpdateData.map((key) => updateData[key]);
+                
+                    result = await new Promise((resolve, reject) => {
+                
+                        const updatedDataObject = keysOfUpdateData.reduce((acc, key, index) => {
+                            acc[key] = dataParameterUpdateData[index];
+                            return acc;
+                        }, {});
+                
+                        conn.query(
+                            queries.updateByAlbum(), [updatedDataObject,id],
+                            (error, result, fields) => {
+                                if (error) reject(error);
+                                else resolve(result);
+                            }
+                        );
+                    });
+                }
+
+                // Set status to 0 for deletedArr
+                for (let i = 0; i < deletedArr.length; i++) {
+                    let updateData = {
+                        album_id: id,
+                        status: 0
+                    }
+
+                    let deleteTestId = await albumWiseArtistModel.updateById(deletedArr[i].id, updateData,
+                        conn
+                    );
+
+
+                    if (
+                        isEmpty(deleteTestId) ||
+                        deleteTestId.affectedRows === undefined ||
+                        deleteTestId.affectedRows < 1
+                    ) {
+
+                        return conn.rollback(() => {
+                            conn.release();
+                            resolve([]);
+                        });
+                    }
+
+                }
+
+
+                // Set status to 1 for addedArr
+                for (let index = 0; index < addedArr.length; index++) {
+                    let addData = {
+                        album_id: id,
+                        artist_id: addedArr[index],
+                        status: 1
+                    }
+                    let addTestId = await albumWiseArtistModel.addNew(addData, conn);
+
+
+                    if (
+                        isEmpty(addTestId) ||
+                        addTestId.affectedRows === undefined ||
+                        addTestId.affectedRows < 1
+                    ) {
+                        return conn.rollback(() => {
+                            conn.release();
+                            resolve([]);
+                        });
+                    }
+                }
+
+                conn.commit((err) => {
+                    if (err) {
+                        return conn.rollback(() => {
+                            conn.release();
+                            resolve([]);
+                        });
+                    }
+
+                    conn.release();
+                    return resolve(result);
+                });
+            });
+        });
+    });
+};
+
+
 module.exports = {
    addNew,
    getByTitle,
    getList,
    getById,
-   updateById
+   updateById,
+   getByArtistId,
+   updateByAlbum
   
 }
