@@ -1,7 +1,12 @@
 const express = require("express");
 const cors = require('cors');
 const app = express();
+// const fileUpload = require('express-fileupload')
 
+
+
+// // middleware
+// app.use(fileUpload())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
