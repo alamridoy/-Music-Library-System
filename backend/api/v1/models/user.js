@@ -32,14 +32,6 @@ let getUserInfo = async (email = "",password="") => {
 }
 
 
-// let get = async (email = "") => {
-//     return new Promise((resolve, reject) => {
-//         connectionMusicLibrarySystemMYSQL.query(queries.getUserByEmail(), [email], (error, result, fields) => {
-//             if (error) reject(error)
-//             else resolve(result)
-//         });
-//     });
-// }
 
 module.exports = {
     getUserByEmail,

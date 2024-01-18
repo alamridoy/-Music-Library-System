@@ -141,22 +141,6 @@ let updateByAlbum = (id = 0, updateData = {}, addedArr = [], deletedArr = [], co
 
                 let result;
 
-                // Update data
-                // if (Object.keys(updateData).length > 0) {
-                //     const keysOfUpdateData = Object.keys(updateData);
-                //     const dataParameterUpdateData = keysOfUpdateData.map((key) => updateData[key]);
-            
-                //     result = await new Promise((resolve, reject) => {
-                //         console.log("sssssssssssssssssss",dataParameterUpdateData)
-                //         conn.query(
-                //             queries.updateByAlbum(updateData), [...dataParameterUpdateData,id],
-                //             (error, result, fields) => {
-                //                 if (error) reject(error); 
-                //                 else resolve(result);
-                //             }
-                //         );
-                //     });
-                // }
                 if (Object.keys(updateData).length > 0) {
                     const keysOfUpdateData = Object.keys(updateData);
                     const dataParameterUpdateData = keysOfUpdateData.map((key) => updateData[key]);
