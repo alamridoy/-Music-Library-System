@@ -54,12 +54,25 @@ let getByArtistId = async (album_id = 0) => {
     });
 }
 
+let getByAlbumInfo = async (album_id = 0) => {
+    return new Promise((resolve, reject) => {
+        connectionMusicLibrarySystemMYSQL.query(queries.getByAlbumInfo(), [album_id], (error, result, fields) => {
+            if (error) reject(error)
+            else resolve(result)
+        });
+    });
+}
+
+
+
 
 module.exports = {
    addNew,
    getList,
    getById,
    updateById,
-   getByArtistId
+   getByArtistId,
+   getByAlbumInfo
+
   
 }

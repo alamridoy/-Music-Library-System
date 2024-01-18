@@ -18,8 +18,8 @@ router.use(fileUpload());
 // create song 
 router.post('/add', verifyToken, [
     // Example body validations
-    check('title').isString().withMessage('Please provide a string'),
-    check('duration').isInt().withMessage('Please give a valid duration time.'),
+    check('title').isString().withMessage('Please provide a valid title.'),
+    check('duration').isTime().withMessage('Please give a valid duration time format 5:25 min and sec.'),
     check('album_id').isInt().withMessage('Please give a valid album id.'),
     check('artist_id').isInt().withMessage('Please give a valid artist id.'),
   ],
@@ -46,8 +46,9 @@ router.post('/add', verifyToken, [
     reqData.created_at = current_time;
     reqData.updated_at = current_time;
 
-    // reqData.created_by = req.decoded.userInfo.id;
-    // reqData.updated_by = req.decoded.userInfo.id;
+    // default 1 because this system has only one role
+    reqData.created_by = 1
+    reqData.updated_by = 1
 
 
     // check song title empty or not and check length
@@ -84,13 +85,14 @@ router.post('/add', verifyToken, [
         "status": 400,
         "message":"Song duration cannot be empty."
       });
-  }else if(reqData.duration < 0){
-      return res.status(400).send({
-        "success": false,
-        "status": 400,
-        "message":"This song duration can not be less than 0."
-      });
-  }
+    }else if(reqData.duration < 0){
+        return res.status(400).send({
+          "success": false,
+          "status": 400,
+          "message":"This song duration can not be less than 0."
+        });
+    }
+
 
   // check album id
    //check artist id empty or not
@@ -107,6 +109,8 @@ router.post('/add', verifyToken, [
           "message": "Album id should be positive number."
     });
   }
+
+
 
   //existing album id in database
   let existingByAlbumId = await albumModel.getById(reqData.album_id)
@@ -197,6 +201,9 @@ router.post('/add', verifyToken, [
     reqData.file_name = musicFile.name;
      
     delete reqData.file_path
+
+
+
     // save in database
     let result = await songModel.addNew(reqData);
 
@@ -293,7 +300,6 @@ router.get('/details/:id',verifyToken,[
     
       } 
     
-
   
     //get album name and artist name
     // get album id by title
@@ -363,7 +369,7 @@ router.delete('/delete',verifyToken,[
   let current_time = moment(current_date, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss");
 
   let data = {
-    status : 0,   // status = 1 (active) and status = 2 (delete)
+    status : 0,   // status = 1 (active) and status = 0 (delete)
     updated_at :current_time
    }
 
@@ -395,7 +401,7 @@ router.put('/update', verifyToken, [
   // Example body validations
   check('id').isInt().withMessage('Please provide a number'),
   check('title').isString().withMessage('Please provide a string'),
-  check('duration').isInt().withMessage('Please give a valid duration time.'),
+  check('duration').isTime().withMessage('Please give a valid duration time.'),
   check('album_id').isInt().withMessage('Please give a valid album id.'),
   check('artist_id').isInt().withMessage('Please give a valid artist id.'),
 ],
@@ -421,8 +427,7 @@ async (req, res) => {
   let current_time = moment(current_date, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss");
   reqData.updated_at = current_time;
 
-  // reqData.created_by = req.decoded.userInfo.id;
-  // reqData.updated_by = req.decoded.userInfo.id;
+
    
   // get artist all info
   let existingDataById = await songModel.getById(reqData.id)
@@ -432,10 +437,11 @@ async (req, res) => {
         "status": 404,
         "message": "Artist data not found",
     });
-} 
-let isError = 0
-let updateData = {};
-let willWeUpdate = 0; // 1 = yes , 0 = no;
+  } 
+
+  let isError = 0
+  let updateData = {};
+  let willWeUpdate = 0; // 1 = yes , 0 = no;
 
 
 
@@ -578,10 +584,6 @@ let willWeUpdate = 0; // 1 = yes , 0 = no;
     });
   }
 
-
-  // remove previous file
-
-
   
   // Save the file to the specified destination folder
   const uploadPath = path.join('./songs/mp3', musicFile.name);
@@ -617,6 +619,7 @@ let willWeUpdate = 0; // 1 = yes , 0 = no;
 if (willWeUpdate == 1) {
 
   updateData.updated_at = current_time
+  updateData.updated_by = 1 // default
 
 
   let result = await songModel.updateById(reqData.id,updateData);
@@ -646,8 +649,6 @@ if (willWeUpdate == 1) {
   });
 }
 
-
- 
 });
 
 

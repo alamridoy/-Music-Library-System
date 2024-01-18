@@ -68,12 +68,14 @@ let updateById = async (id = 0, data = {}) => {
 
 
 
+
 module.exports = {
    addNew,
    getByTitle,
    getList,
    getById,
    updateById,
-   getByArtistId  
+   getByArtistId
+     
   
 }

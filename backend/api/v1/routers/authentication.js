@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
 const isEmpty = require("is-empty");
-
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require("moment");
@@ -30,17 +28,17 @@ router.post('/registration', [
 
     // body data
     let reqData = {
-                "email": req.body.email,
-                "password":req.body.password,
-           }
+            "email": req.body.email,
+            "password":req.body.password,
+          }
+
     
     let current_date = new Date(); 
     let current_time = moment(current_date, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss");
     reqData.created_at = current_time;
     reqData.role_id = 1
- 
-  
 
+ 
 
     // this email check unique
     let existingByEmail = await userModel.getUserByEmail(reqData.email)
@@ -52,9 +50,8 @@ router.post('/registration', [
        });
     }
 
-
-    // password hashing
-     reqData.password = bcrypt.hashSync(reqData.password,10)
+  // password hashing
+  reqData.password = bcrypt.hashSync(reqData.password,10)
 
 
    // save in database
@@ -133,10 +130,5 @@ router.post('/login', [
   });
 
 
-
-// test
-router.get('/abc',verifyToken,async(req,res)=>{
-    res.send("hello ridoy demo")
-})
 
 module.exports = router;  

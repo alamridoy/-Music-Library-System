@@ -244,6 +244,16 @@ let updateByAlbum = (id = 0, updateData = {}, addedArr = [], deletedArr = [], co
 };
 
 
+let getArtistListByAlbumId = async (artist_id = 0) => {
+    return new Promise((resolve, reject) => {
+        connectionMusicLibrarySystemMYSQL.query(queries.getArtistListByAlbumId(), [artist_id], (error, result, fields) => {
+            if (error) reject(error)
+            else resolve(result)
+        });
+    });
+}
+
+
 module.exports = {
    addNew,
    getByTitle,
@@ -251,6 +261,8 @@ module.exports = {
    getById,
    updateById,
    getByArtistId,
-   updateByAlbum
+   updateByAlbum,
+   getArtistListByAlbumId
+   
   
 }

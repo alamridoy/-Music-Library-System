@@ -8,6 +8,7 @@ const artistModel = require('../models/artist');
 const genreModel = require('../models/genre');
 const albumModel = require('../models/album');
 const albumWiseArtistModel = require('../models/album-wise-artist');
+const e = require("express");
 
 
 
@@ -15,7 +16,7 @@ const albumWiseArtistModel = require('../models/album-wise-artist');
 //add
 router.post('/add', verifyToken, [
     // Example body validations
-    check('title').isString().withMessage('Please provide a string'),
+    check('title').isString().withMessage('Please provide a valid title.'),
     check('release_year').isInt().withMessage('Please give a valid year.'),
     check('genre_id').isInt().withMessage('Please give a valid genre id.'),
     check('artist_id').isInt().withMessage('Please give a valid artist id.'),
@@ -27,10 +28,9 @@ router.post('/add', verifyToken, [
       return res.status(400).json({ errors: errors.array() });
     }
   
- 
   try {
      
-      // body data
+    // body data
     let reqData = {
         "title": req.body.title,
         "release_year":req.body.release_year,
@@ -43,8 +43,10 @@ router.post('/add', verifyToken, [
     reqData.created_at = current_time;
     reqData.updated_at = current_time;
 
-    // reqData.created_by = req.decoded.userInfo.id;
-    // reqData.updated_by = req.decoded.userInfo.id;
+
+    // default 1 because this system has only one role
+    reqData.created_by = 1
+    reqData.updated_by = 1
 
 
     // check album title empty or not and check length
@@ -124,8 +126,6 @@ router.post('/add', verifyToken, [
 
 
 
-
-
     // validate artist id and artist id can be single or multiple
     if(isEmpty(reqData.artist_id)){
       return res.status(400).send({
@@ -170,7 +170,7 @@ router.post('/add', verifyToken, [
         return res.status(409).send({
             "success": false,
             "status": 409,
-            "message": "Duplicate value found"
+            "message": "Duplicate value found."
       });
      }
 
@@ -178,12 +178,15 @@ router.post('/add', verifyToken, [
 
  }
  
+
   let albumData ={
     title : reqData.title,
     release_year : reqData.release_year,
     genre_id : reqData.genre_id,
     created_at: reqData.created_at,
-    updated_at: reqData.updated_at
+    updated_at: reqData.updated_at,
+    created_by : reqData.created_by,
+    updated_by : reqData.updated_by
   }
 
 
@@ -207,10 +210,8 @@ router.post('/add', verifyToken, [
   });
    
 } catch (error) {
-      
-
-      console.error(error);
-      return res.status(500).json({ message: 'Internal Server Error' });
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
 }
 
 });
@@ -222,7 +223,7 @@ router.get('/list', verifyToken, async (req, res) => {
 
     let result = await albumModel.getList();
 
-    let crackArr = []
+    let tempArr = []
     for (let index = 0; index < result.length; index++) {
         const albumData = result[index];
 
@@ -231,7 +232,7 @@ router.get('/list', verifyToken, async (req, res) => {
         result[index].genre_title = genreData[0].title
 
         // album id store this array
-        crackArr.push(albumData.id)
+        tempArr.push(albumData.id)
     }
 
 
@@ -249,7 +250,7 @@ router.get('/list', verifyToken, async (req, res) => {
 //details
 router.get('/details/:id',verifyToken,[
     // Example body validations
-    check('id').isInt().withMessage('Please provide a number'),
+    check('id').isInt().withMessage('Please provide a valid number.'),
   ],
   async (req, res) => {
     // Handle the request only if there are no validation errors
@@ -275,11 +276,14 @@ router.get('/details/:id',verifyToken,[
       } 
 
 
-    const albumData = result[0];
-
     // get genre id by title
-    let genreData = await genreModel.getById(albumData.genre_id)
-    result[0].genre_title = genreData[0].title
+    let genreData = await genreModel.getById(result[0].genre_id)
+    console.log("dsd",result)
+    if(isEmpty(genreData)){
+      result[0].genre_title = ""
+    }else{
+      result[0].genre_title = genreData[0].title
+    }
 
 
   return res.status(200).send({
@@ -290,14 +294,13 @@ router.get('/details/:id',verifyToken,[
   });
       
     
-
 });
 
 
 //delete
 router.delete('/delete',verifyToken,[
     // Example body validations
-    check('id').isInt().withMessage('Please provide a number'),
+    check('id').isInt().withMessage('Please provide a valid number.'),
   ],async (req, res) => {
     // Handle the request only if there are no validation errors
     const errors = validationResult(req);
@@ -325,7 +328,7 @@ router.delete('/delete',verifyToken,[
     let current_time = moment(current_date, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss");
   
     let data = {
-      status : 0,   // status = 1 (active) and status = 2 (delete)
+      status : 0,   // status = 1 (active) and status = 0 (delete)
       updated_at :current_time
      }
   
@@ -348,15 +351,15 @@ router.delete('/delete',verifyToken,[
        });
     
   
-  });
+});
 
 
 
 //update
 router.put('/update', verifyToken, [
     // Example body validations
-    check('id').isInt().withMessage('Please give a valid  id.'),
-    check('title').isString().withMessage('Please provide a string'),
+    check('id').isInt().withMessage('Please give a valid id.'),
+    check('title').isString().withMessage('Please provide a valid title.'),
     check('release_year').isInt().withMessage('Please give a valid year.'),
     check('genre_id').isInt().withMessage('Please give a valid genre id.'),
     check('artist_id').isInt().withMessage('Please give a valid artist id.'),
@@ -369,7 +372,6 @@ router.put('/update', verifyToken, [
     }
   
   
-  
       // body data
       let reqData = {
         "id":req.body.id,
@@ -377,17 +379,21 @@ router.put('/update', verifyToken, [
         "release_year":req.body.release_year,
         "genre_id":req.body.genre_id,
         "artist_id":req.body.artist_id
-    }
+      }
 
   
     let current_date = new Date(); 
     let current_time = moment(current_date, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss");
     reqData.updated_at = current_time;
   
-    // reqData.created_by = req.decoded.userInfo.id;
-    // reqData.updated_by = req.decoded.userInfo.id;
+    
+    // default 1 because this system has only one role
+    reqData.created_by = 1
+    reqData.updated_by = 1
      
-    // get artist all info
+
+
+    // get artist all list
     let existingDataById = await albumModel.getById(reqData.id)
     if (isEmpty(existingDataById)) {
       return res.status(404).send({
@@ -396,6 +402,7 @@ router.put('/update', verifyToken, [
           "message": "Album data not found",
       });
   } 
+
   let isError = 0
   let updateData = {};
   let willWeUpdate = 0; // 1 = yes , 0 = no;
@@ -419,20 +426,10 @@ router.put('/update', verifyToken, [
               "message":"Album title should be maximum 50 character."
             });
         }
-    
-        // // title existing database
-        // let existingTitle = await albumModel.getByTitle(reqData.title)
-        // if(!isEmpty(existingTitle)){
-        //     return res.status(409).send({
-        //         "success": false,
-        //         "status": 409,
-        //         "message":"This title already exists."
-        //       });
-        // }
-    
   
-    willWeUpdate = 1
-    updateData.title = reqData.title
+  
+        willWeUpdate = 1
+        updateData.title = reqData.title
   
     }
   
@@ -461,8 +458,8 @@ router.put('/update', verifyToken, [
     }
 
 
-    willWeUpdate = 1
-    updateData.release_year = reqData.release_year
+      willWeUpdate = 1
+      updateData.release_year = reqData.release_year
       
     } 
 
@@ -501,7 +498,6 @@ router.put('/update', verifyToken, [
 
 
     // artist id update
-
     //check artist id empty or not
     if(isEmpty(reqData.artist_id)){
         return res.status(400).send({
@@ -555,9 +551,7 @@ router.put('/update', verifyToken, [
 
     }
 
-    artistArrayId = tempId
-
-    console.log("new",artistArrayId)
+    let artistArrayId = tempId  // assign data
 
 
     // get album wise artist table album id wise artist id find
@@ -580,12 +574,10 @@ router.put('/update', verifyToken, [
         })
 
     }
-console.log("pre",artistId)
+
 
     // this place will be check get separate artist request new artist id and old artist id find
     // new artist id has this array artistArrayId and previous db artist id has this array artistId
-
-    
 
     let addedArr = [];
     let deletedArr = [];
@@ -600,19 +592,7 @@ console.log("pre",artistId)
     // Find added items
     addedArr = artistArrayId.filter(id => !artistIdSet.has(id));
     
-    console.log("Deleted", deletedArr);
-    console.log("Add new", addedArr);
-        
-    
-    
 
-   
-    // return res.status(404).send({
-    //     "success": false,
-    //     "status": 404,
-    //     "message": updateData
-    // });
-  
     if (isError == 1) {
       return res.status(400).send({
           "success": false,
@@ -624,7 +604,10 @@ console.log("pre",artistId)
   if (willWeUpdate == 1) {
   
     updateData.updated_at = current_time
-    console.log(reqData.id,updateData)
+    updateData.updated_by = 1 // default 1 because this system has only one role
+
+
+        
     let result = await albumModel.updateByAlbum(reqData.id,updateData,addedArr,deletedArr);
   
   
@@ -652,14 +635,71 @@ console.log("pre",artistId)
     });
   }
   
+});
 
-   
+
+
+
+// album wise artist list
+router.post('/album-wise-artist-list', verifyToken, [
+    // Example body validations
+    check('album_id').isInt().withMessage('Please provide a valid album id.')
+  ],
+  async (req, res) => {
+    // Handle the request only if there are no validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+  
+    let album_id = req.body.album_id
+  
+    // Existing id on database
+    let existingDataById = await albumModel.getById(album_id)
+    if (isEmpty(existingDataById)) {
+      return res.status(404).send({
+        "success": false,
+        "status": 404,
+        "message": "Album data not found",
+      });
+    }
+
+
+    
+    // get album wise artist list
+    let artistList = await albumModel.getArtistListByAlbumId(album_id);
+    
+
+    // // get genre id by title
+    // let genreData = await genreModel.getById(artistList[0].genre_id)
+    //    if(isEmpty(genreData)){
+    //     artistList[0].genre_title = ""
+    //    }else{
+    //     artistList[0].genre_title = genreData[0].title
+    //    }
+  console.log("sss",artistList)
+
+    let singer = []
+    singer.push(...artistList)
+    existingDataById[0].singer = singer
+    
+
+  
+    return res.status(200).send({
+      success: true,
+      status: 200,
+      count: existingDataById.length,
+      message: "Album wise artist list.",
+      data: existingDataById[0]
+    });
+  
 });
   
 
 
 
-// check duplicate value function
+
+// check duplicate value common function
 let duplicateCheckInArray = async (arrayData = []) => {
     let set = new Set();
   
@@ -677,6 +717,7 @@ let duplicateCheckInArray = async (arrayData = []) => {
       result: false,
       message: "Duplicate value not found.",
     };
-  };
+};
+
 
 module.exports = router;  
