@@ -15,7 +15,7 @@ let getList = () => {
 }
 
 let getById = () => {
-    return `SELECT id,title,release_year FROM ${table_name} where  id = ? and status = 1 `;
+    return `SELECT id,title,release_year,genre_id,status FROM ${table_name} where  id = ? and status = 1 `;
 }
 
 const updateById = () => {

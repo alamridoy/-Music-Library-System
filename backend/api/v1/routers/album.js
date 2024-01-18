@@ -668,16 +668,15 @@ router.post('/album-wise-artist-list', verifyToken, [
     
     // get album wise artist list
     let artistList = await albumModel.getArtistListByAlbumId(album_id);
-    
 
-    // // get genre id by title
-    // let genreData = await genreModel.getById(artistList[0].genre_id)
-    //    if(isEmpty(genreData)){
-    //     artistList[0].genre_title = ""
-    //    }else{
-    //     artistList[0].genre_title = genreData[0].title
-    //    }
-  console.log("sss",artistList)
+    // get genre id by title
+    let genreData = await genreModel.getById(existingDataById[0].genre_id)
+    if(isEmpty(genreData)){
+        existingDataById[0].genre_title = ""
+    }else{
+        existingDataById[0].genre_title = genreData[0].title
+    }
+   
 
     let singer = []
     singer.push(...artistList)

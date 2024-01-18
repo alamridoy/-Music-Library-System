@@ -10,9 +10,12 @@ const albumModel = require('../models/album');
 const fileUpload = require('express-fileupload')
 const path = require('path')
 const fs = require('fs');
+
 router.use(fileUpload());
+require('dotenv').config();
 
 
+let imagePathName = `${process.env.backend_url}/${process.env.image_path}`;
 
 
 // create song 
@@ -267,6 +270,7 @@ router.get('/list', verifyToken, async (req, res) => {
       "status": 200,
       "message": "Song List.",
       "count": result.length,
+      "imagePathName" :imagePathName,
       "data": result
   });
 });
@@ -329,6 +333,7 @@ router.get('/details/:id',verifyToken,[
       success: true,
       status: 200,
       message: "Artist details.",
+      imagePathName :imagePathName,
       data: result[0],
   });
       
