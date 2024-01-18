@@ -278,7 +278,6 @@ router.get('/details/:id',verifyToken,[
 
     // get genre id by title
     let genreData = await genreModel.getById(result[0].genre_id)
-    console.log("dsd",result)
     if(isEmpty(genreData)){
       result[0].genre_title = ""
     }else{

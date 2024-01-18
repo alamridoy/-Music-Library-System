@@ -294,7 +294,6 @@ async (req, res) => {
   // check date of birth is equal to today to tomorrow
   if(existingDataById[0].date_of_birth !== reqData.date_of_birth){
     let date = moment(current_date, "YYYY-MM-DD").format("YYYY-MM-DD");
-    console.log(date)
     if (reqData.date_of_birth >= date) {
       return res.status(400).send({
           "success": false,
