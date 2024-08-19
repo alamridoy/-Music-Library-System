@@ -3,7 +3,7 @@ require('dotenv').config();
 
 
 // This is for single connect
-const connectionMusicLibrarySystem = mysql.createPool({
+const connectionDblystem = mysql.createPool({
     connectionLimit: 10,
     host: process.env.DB_HOST_v1,
     user: process.env.DB_USER_v1,
@@ -14,6 +14,6 @@ const connectionMusicLibrarySystem = mysql.createPool({
 
 module.exports = {
     
-    connectionMusicLibrarySystemMYSQL: connectionMusicLibrarySystem,
+    connectionDblystem: connectionDblystem,
    
 }

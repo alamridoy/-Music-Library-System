@@ -76,19 +76,8 @@ router.post('/registration', [
 
 
 //login
-router.post('/login', [
-    // Example body validations
-    check('email').isEmail().withMessage('Please provide a valid email address'),
-    check('password')
-      .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
-  ],
-  async (req, res) => {
-    // Handle the request only if there are no validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-  
+router.post('/login',async (req, res) => {
+
     // Body data
     let reqData = {
       "email": req.body.email,
@@ -118,7 +107,7 @@ router.post('/login', [
 
 
     // Create and sign a JWT token
-    const token = jwt.sign({ userId: existingByUserInfo.id, email: existingByUserInfo.email },keyData.secretKey, {'expiresIn':'1h'});
+    const token = jwt.sign({ userName : existingByUserInfo.name,userId: existingByUserInfo.id, email: existingByUserInfo.email },keyData.secretKey, {'expiresIn':'1h'});
   
     // Respond with the token
     return res.status(200).send({

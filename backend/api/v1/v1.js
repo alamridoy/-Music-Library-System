@@ -2,28 +2,22 @@ const express = require("express");
 const router = express.Router();
 
 
-
-const { connectionMusicLibrarySystemMYSQL } = require('./connections/connection');
-//const { routeAccessChecker } = require('./middlewares/routeAccess');
+const { connectionDblystem } = require('./connections/connection');
 global.config = require('./jwt/config');
-//const verifyToken = require('./middlewares/jwt_verify/verifyToken');
-//const moduleModel = require('./models/module');
 
 
 
-//const adminRouter = require('./routers/authentication');
 
 const authenticationRouter = require('./routers/authentication');
-const artistRouter = require('./routers/artist');
-const albumRouter = require('./routers/album');
-const songRouter = require('./routers/song');
+
+const employeeRouter = require('./routers/employee');
+
 
 
 
 router.use('/authentication', authenticationRouter);
-router.use('/artist', artistRouter);
-router.use('/album', albumRouter);
-router.use('/song', songRouter);
+router.use('/employee', employeeRouter);
+
 
 
 module.exports = router;  

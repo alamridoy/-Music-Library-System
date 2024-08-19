@@ -1,4 +1,4 @@
-let table_name = "m360ict_users";
+let table_name = "new_admin";
 
 
 let getUserByEmail = () => {
